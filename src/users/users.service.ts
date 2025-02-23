@@ -57,13 +57,6 @@ export class UsersService {
     return user;
   }
 
-  // Добавление города в список избранных
-  async addCityToFavorites(user: User, city: City) {
-    // Добавляем город в избранное
-    await user.$add("favouriteCities", city);
-    return user;
-  }
-
   async getAllUser() {
     const users = await this.userRepository.findAll({ include: { all: true } });
     return users;
