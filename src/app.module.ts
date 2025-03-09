@@ -22,6 +22,7 @@ import { UserCities } from "./city/user-cities.model";
       database: process.env.POSTGRES_DB,
       models: [User, City, UserCities],
       autoLoadModels: true,
+      logging: false,
     }),
     UsersModule,
     CityModule,

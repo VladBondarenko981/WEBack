@@ -6,12 +6,12 @@ import { CreateCityDto } from "./dto/create-city.dto";
 import { Post, Body, Get, Param } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
-@ApiTags("Города")
+@ApiTags("Cities")
 @Controller("city")
 export class CityController {
   constructor(private cityService: CityService) {}
 
-  @ApiOperation({ summary: "Получить все избранные города" })
+  @ApiOperation({ summary: "Get all selected cities" })
   @ApiResponse({ status: 200, type: [City] })
   @Get()
   getAll() {

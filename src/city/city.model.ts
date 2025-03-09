@@ -15,7 +15,7 @@ interface CityCreationAttrs {
 
 @Table({ tableName: "city" })
 export class City extends Model<City, CityCreationAttrs> {
-  @ApiProperty({ example: "1", description: "Айдишник" })
+  @ApiProperty({ example: "1", description: "ID specialist" })
   @Column({
     type: DataType.INTEGER,
     unique: true,
@@ -24,7 +24,7 @@ export class City extends Model<City, CityCreationAttrs> {
   })
   id: number;
 
-  @ApiProperty({ example: "Kiev", description: "Название города" })
+  @ApiProperty({ example: "Kiev", description: "City name" })
   @Column({
     type: DataType.STRING,
     allowNull: false,

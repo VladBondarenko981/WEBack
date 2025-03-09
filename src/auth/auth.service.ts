@@ -18,15 +18,64 @@ export class AuthService {
   ) {}
 
   async login(userDto: CreateUserDto) {
-    const user = await this.validateUser(userDto);
-    return this.generateToken(user);
+    try {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      // Проверка формата email
+      if (!emailRegex.test(userDto.email)) {
+        throw new HttpException(
+          "Incorrect email format",
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      // Валидация пароля
+      if (userDto.password.length < 6) {
+        throw new HttpException(
+          "Password must be at least 6 characters long",
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      const user = await this.validateUser(userDto);
+
+      if (!user) {
+        throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+      }
+
+      return this.generateToken(user);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          "Error while trying to log in",
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
   }
 
   async registration(userDto: CreateUserDto) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userDto.email)) {
+      throw new HttpException("Incorrect email format", HttpStatus.BAD_REQUEST);
+    }
+    if (userDto.password.length < 6) {
+      throw new HttpException(
+        "Password must be at least 6 characters long",
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    if (userDto.username.length < 3) {
+      throw new HttpException(
+        "Username must be at least 3 characters long",
+        HttpStatus.BAD_REQUEST
+      );
+    }
     const candidate = await this.userService.getUserByEmail(userDto.email);
     if (candidate) {
       throw new HttpException(
-        "Пользователь с таким email существует",
+        "A user with this email exists",
         HttpStatus.BAD_REQUEST
       );
     }
@@ -35,7 +84,7 @@ export class AuthService {
     );
     if (candidateUser) {
       throw new HttpException(
-        "Пользователь с таким username существует",
+        "A user with this username exists",
         HttpStatus.BAD_REQUEST
       );
     }
@@ -44,7 +93,6 @@ export class AuthService {
       ...userDto,
       password: hashPassword,
     });
-    console.log(this.generateToken(user));
     return this.generateToken(user);
   }
 
@@ -70,22 +118,21 @@ export class AuthService {
       return user;
     }
     throw new UnauthorizedException({
-      message: "Неккоретній эмейил или пароль",
+      message: "Incorrect email or password",
     });
   }
 
   async changePassword(email: string, password: string, newPassword: string) {
-    console.log(email, password, newPassword);
     const user = await this.userService.getUserByEmail(email);
     if (!user) {
       throw new UnauthorizedException({
-        message: "Пользователь с таким email не найден",
+        message: "User with this email not found",
       });
     }
     const passwordEquals = await bcrypt.compare(password, user.password);
     if (!passwordEquals) {
       throw new UnauthorizedException({
-        message: "Неверный старый пароль",
+        message: "Incorrect old password",
       });
     }
     const hashPassword = await bcrypt.hash(newPassword, 5);

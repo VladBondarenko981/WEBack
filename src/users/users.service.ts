@@ -14,7 +14,6 @@ export class UsersService {
     private cityService: CityService
   ) {}
 
-  // Создание пользователя и добавление городов
   async createUser(dto: CreateUserDto) {
     const user = await this.userRepository.create(dto);
     return user;
@@ -27,24 +26,20 @@ export class UsersService {
     userId: number;
     cityName: string;
   }) {
-    // 1. Проверяем, существует ли город с таким названием
     let city = await this.cityService.getCityByName(cityName);
-    // 2. Если города нет в базе, создаем новый
     if (!city) {
       city = await this.cityService.createCity({ name: cityName });
     }
-    // 3. Находим пользователя по ID
     const user = await this.userRepository.findByPk(userId, {
       include: { all: true },
     });
     if (!user) {
-      throw new Error(`Пользователь с ID ${userId} не найден`);
+      throw new Error(`User with ID ${userId} not found`);
     }
-    // 4. Добавляем город в список избранных
     await user.$add("favouriteCities", city);
-    // Возвращаем обновленного пользователя с городами
+
     return {
-      message: "Город добавлен в избранное",
+      message: "City added to favorites",
       favouriteCities: user.favouriteCities,
     };
   }
@@ -53,7 +48,6 @@ export class UsersService {
     const user = await this.userRepository.findByPk(userId, {
       include: { all: true },
     });
-    console.log("User found:", user);
     return user;
   }
 
@@ -81,7 +75,7 @@ export class UsersService {
   async changeUsername(oldUsername: string, newUsername: string) {
     const user = await this.getUserByUsername(oldUsername);
     if (!user) {
-      throw new Error(`Пользователь с юзернеймом ${oldUsername} не найден`);
+      throw new Error(`User with username ${oldUsername} not found`);
     }
     user.username = newUsername;
     await user.save();
@@ -91,7 +85,7 @@ export class UsersService {
   async changeEmail(oldEmail: string, newEmail: string) {
     const user = await this.getUserByEmail(oldEmail);
     if (!user) {
-      throw new Error(`Пользователь с емеилом ${oldEmail} не найден`);
+      throw new Error(`User with email ${oldEmail} not found`);
     }
     user.email = newEmail;
     await user.save();
